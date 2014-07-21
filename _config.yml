@@ -3,11 +3,11 @@
 # ----------------------- #
 
 url: http://jmb.github.io
-title: Jonathan's Blog
-subtitle: A blogging framework for hackers.
+title: Jonathan's Notes
+subtitle: Notes from a part-time coder
 author: Jonathan Batchelor
 simple_search: https://www.google.com/search
-description:
+description: Stuff that I've found out while playing around with code, that might be useful to others...
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
