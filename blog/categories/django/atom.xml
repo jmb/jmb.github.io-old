@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Django | Jonathan's Notes]]></title>
+  <link href="http://jmb.github.io/blog/categories/django/atom.xml" rel="self"/>
+  <link href="http://jmb.github.io/"/>
+  <updated>2014-07-21T16:04:38+01:00</updated>
+  <id>http://jmb.github.io/</id>
+  <author>
+    <name><![CDATA[Jonathan Batchelor]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Django on Dreamhost With Up-to-date Python]]></title>
+    <link href="http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/"/>
+    <updated>2014-07-21T15:37:51+01:00</updated>
+    <id>http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python</id>
+    <content type="html"><![CDATA[<p>I recently went through the process of installing my own python (2.7.7) and Django (1.6.5) versions on my Dreamhost account in order to be on the same versions as I&rsquo;m running in development.</p>
+
+<p>I used <a href="http://stackoverflow.com/questions/10953695/update-new-django-and-python-2-7-with-virtualenv-on-dreamhost-with-passenger">this guide from stackexchange</a> as a basis, with a few tweaks.</p>
+
+<h2>Building a custom python install</h2>
+
+<p>SSH into your shell account</p>
+
+<pre><code>cd ~
+mkdir tmp
+cd tmp
+wget http://www.python.org/ftp/python/2.7.7/Python-2.7.7.tgz
+tar zxvf Python-2.7.7.tgz
+cd Python-2.7.7
+./configure --prefix=$HOME/opt/python-2.7.7
+make
+make install
+</code></pre>
+
+<p>This will install your local version of python to <code>/home/&lt;username&gt;/opt/python-2.7.7</code></p>
+
+<p>Add to your path in order to use this version of python over the system default: <code>export PATH=$HOME/opt/python-2.7.7/bin:$PATH</code>. You can also add this line to the .bashrc and/or .bash_profile file in your home directory to make this permanent. (<a href="http://www.joshstaiger.org/archives/2005/07/bash_profile_vs.html"> see here for info on the difference</a>) Other shells are available, but I&rsquo;ll assume if you&rsquo;ve changed yours you really know what you&rsquo;re doing!</p>
+
+<p>Check which version of python you&rsquo;re now using: <code>python -V</code></p>
+
+<p>In order to install various python packages, and Django in particular, then you&rsquo;ll want <a href="https://pip.pypa.io/en/latest/installing.html">pip</a>.</p>
+
+<pre><code>curl https://bootstrap.pypa.io/get-pip.py &gt; ~/tmp/get-pip.py
+python ~/tmp/get-pip.py
+</code></pre>
+
+<p>(Using curl here rather than wget, as it handles the secure site (https) better)</p>
+
+<p>Finally in order to &ldquo;freeze&rdquo; the package versions for your website (so they don&rsquo;t automatically update when you set up another site at a later date), you&rsquo;ll likely want to install virtualenv: <code>pip install virtualenv</code></p>
+
+<h2>Setting up your Django site</h2>
+
+<p>In the <a href="https://panel.dreamhost.com">Dreamhost Panel</a> set up a new fully hosted domain with a web directory set to /home/username/<code>&lt;domain.name&gt;/public</code> and enable Passenger.
+Once the new directory has been created on your server, set up a new virtualenv:</p>
+
+<pre><code>virtualenv $HOME/&lt;domain.name&gt;/env
+</code></pre>
+
+<p>This will create a local copy of your environment specific to this website.</p>
+
+<p>While working on this website, you should activate the local environment in order to make sure you&rsquo;re working with the right versions of your tools and packages:</p>
+
+<pre><code>source $HOME/&lt;domain.name&gt;/env/bin/activate
+</code></pre>
+
+<p>Now you can install Django and any other required packages (e.g. MySQL-python if you&rsquo;re going to use a MySQL database) for your website using pip:</p>
+
+<pre><code>pip install Django MySQL-python
+</code></pre>
+
+<p>Now you can create your Django project:</p>
+
+<pre><code>cd $HOME/&lt;domain.name&gt;/
+python env/bin/django-admin.py startproject &lt;projectname&gt;
+</code></pre>
+
+<p>In order for Passenger to pick up your project, you need to create a <code>passenger_wsgi.py</code> file within your site&rsquo;s top level directory (<code>/home/&lt;username&gt;/&lt;domain.name&gt;</code>).
+The file should contain the following:</p>
+
+<pre><code>import sys, os
+cwd = os.getcwd()
+sys.path.append(cwd)
+sys.path.append(os.path.join(cwd, '/&lt;projectname&gt;'))  #You must add your project here
+
+#Switch to new python
+if sys.version &lt; "2.7.7": os.execl(os.path.join(cwd,"/env/bin/python"), "python2.7", *sys.argv)
+
+sys.path.insert(0, os.path.join(cwd'/env/bin'))
+sys.path.insert(0, os.path.join(cwd'/env/lib/python2.7/site-packages/django'))
+sys.path.insert(0, os.path.join(cwd'/env/lib/python2.7/site-packages'))
+
+os.environ['DJANGO_SETTINGS_MODULE'] = "&lt;projectname&gt;.settings"
+import django.core.handlers.wsgi
+application = django.core.handlers.wsgi.WSGIHandler()
+</code></pre>
+
+<p>Be sure to replace the two instances of <code>&lt;projectname&gt;</code> with your actual project name!</p>
+
+<p>You should set up django&rsquo;s static files settings in order to correctly serve images, css and javascript &ndash; you will need this for the admin interface to work for example.</p>
+
+<p>Within the projects setting file, found at <code>&lt;projectname&gt;/&lt;projectname&gt;/settings.py</code> you will find that the <code>STATIC_URL</code> is probably configured to <code>/static/</code>.
+Add another line to set the location on the server of the actual static directory:</p>
+
+<pre><code>STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), '/public/static/')
+</code></pre>
+
+<p>This will be the location where Django will put all of your static files &ndash; you shouldn&rsquo;t put stuff here manually as it gets overwritten. Run the collectstatic command now to set up the static items for the admin interface:</p>
+
+<pre><code>cd $HOME/&lt;domain&gt;/
+&lt;projectname&gt;/manage.py collectstatic
+</code></pre>
+
+<p>Finally you should set up your database as required within the settings.py file &ndash; the default is to use sqlite3, which may be suitable for the smallest of sites, but it&rsquo;s likely you&rsquo;ll want to set up a mysql database.
+Once configured, run a syncdb:</p>
+
+<pre><code>&lt;projectname&gt;/manage.py syncdb
+</code></pre>
+
+<p>Set up a superuser as and if required.</p>
+
+<p>Et voila! You should now see the standard Django holding page at your domain and be able to access the admin console at <code>http://domain.name/admin/</code>.</p>
+]]></content>
+  </entry>
+  
+</feed>

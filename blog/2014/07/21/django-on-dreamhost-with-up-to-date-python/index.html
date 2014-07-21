@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Django on Dreamhost With Up-to-date Python - Jonathan's Notes</title>
+  <meta name="author" content="Jonathan Batchelor">
+
+  
+  <meta name="description" content="I recently went through the process of installing my own python (2.7.7) and Django (1.6.5) versions on my Dreamhost account in order to be on the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Jonathan's Notes" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Jonathan's Notes</a></h1>
+  
+    <h2>Notes from a part-time coder</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jmb.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Django on Dreamhost With Up-to-date Python</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-21T15:37:51+01:00" pubdate data-updated="true">Jul 21<sup>st</sup>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I recently went through the process of installing my own python (2.7.7) and Django (1.6.5) versions on my Dreamhost account in order to be on the same versions as I&rsquo;m running in development.</p>
+
+<p>I used <a href="http://stackoverflow.com/questions/10953695/update-new-django-and-python-2-7-with-virtualenv-on-dreamhost-with-passenger">this guide from stackexchange</a> as a basis, with a few tweaks.</p>
+
+<h2>Building a custom python install</h2>
+
+<p>SSH into your shell account</p>
+
+<pre><code>cd ~
+mkdir tmp
+cd tmp
+wget http://www.python.org/ftp/python/2.7.7/Python-2.7.7.tgz
+tar zxvf Python-2.7.7.tgz
+cd Python-2.7.7
+./configure --prefix=$HOME/opt/python-2.7.7
+make
+make install
+</code></pre>
+
+<p>This will install your local version of python to <code>/home/&lt;username&gt;/opt/python-2.7.7</code></p>
+
+<p>Add to your path in order to use this version of python over the system default: <code>export PATH=$HOME/opt/python-2.7.7/bin:$PATH</code>. You can also add this line to the .bashrc and/or .bash_profile file in your home directory to make this permanent. (<a href="http://www.joshstaiger.org/archives/2005/07/bash_profile_vs.html"> see here for info on the difference</a>) Other shells are available, but I&rsquo;ll assume if you&rsquo;ve changed yours you really know what you&rsquo;re doing!</p>
+
+<p>Check which version of python you&rsquo;re now using: <code>python -V</code></p>
+
+<p>In order to install various python packages, and Django in particular, then you&rsquo;ll want <a href="https://pip.pypa.io/en/latest/installing.html">pip</a>.</p>
+
+<pre><code>curl https://bootstrap.pypa.io/get-pip.py &gt; ~/tmp/get-pip.py
+python ~/tmp/get-pip.py
+</code></pre>
+
+<p>(Using curl here rather than wget, as it handles the secure site (https) better)</p>
+
+<p>Finally in order to &ldquo;freeze&rdquo; the package versions for your website (so they don&rsquo;t automatically update when you set up another site at a later date), you&rsquo;ll likely want to install virtualenv: <code>pip install virtualenv</code></p>
+
+<h2>Setting up your Django site</h2>
+
+<p>In the <a href="https://panel.dreamhost.com">Dreamhost Panel</a> set up a new fully hosted domain with a web directory set to /home/username/<code>&lt;domain.name&gt;/public</code> and enable Passenger.
+Once the new directory has been created on your server, set up a new virtualenv:</p>
+
+<pre><code>virtualenv $HOME/&lt;domain.name&gt;/env
+</code></pre>
+
+<p>This will create a local copy of your environment specific to this website.</p>
+
+<p>While working on this website, you should activate the local environment in order to make sure you&rsquo;re working with the right versions of your tools and packages:</p>
+
+<pre><code>source $HOME/&lt;domain.name&gt;/env/bin/activate
+</code></pre>
+
+<p>Now you can install Django and any other required packages (e.g. MySQL-python if you&rsquo;re going to use a MySQL database) for your website using pip:</p>
+
+<pre><code>pip install Django MySQL-python
+</code></pre>
+
+<p>Now you can create your Django project:</p>
+
+<pre><code>cd $HOME/&lt;domain.name&gt;/
+python env/bin/django-admin.py startproject &lt;projectname&gt;
+</code></pre>
+
+<p>In order for Passenger to pick up your project, you need to create a <code>passenger_wsgi.py</code> file within your site&rsquo;s top level directory (<code>/home/&lt;username&gt;/&lt;domain.name&gt;</code>).
+The file should contain the following:</p>
+
+<pre><code>import sys, os
+cwd = os.getcwd()
+sys.path.append(cwd)
+sys.path.append(os.path.join(cwd, '/&lt;projectname&gt;'))  #You must add your project here
+
+#Switch to new python
+if sys.version &lt; "2.7.7": os.execl(os.path.join(cwd,"/env/bin/python"), "python2.7", *sys.argv)
+
+sys.path.insert(0, os.path.join(cwd'/env/bin'))
+sys.path.insert(0, os.path.join(cwd'/env/lib/python2.7/site-packages/django'))
+sys.path.insert(0, os.path.join(cwd'/env/lib/python2.7/site-packages'))
+
+os.environ['DJANGO_SETTINGS_MODULE'] = "&lt;projectname&gt;.settings"
+import django.core.handlers.wsgi
+application = django.core.handlers.wsgi.WSGIHandler()
+</code></pre>
+
+<p>Be sure to replace the two instances of <code>&lt;projectname&gt;</code> with your actual project name!</p>
+
+<p>You should set up django&rsquo;s static files settings in order to correctly serve images, css and javascript &ndash; you will need this for the admin interface to work for example.</p>
+
+<p>Within the projects setting file, found at <code>&lt;projectname&gt;/&lt;projectname&gt;/settings.py</code> you will find that the <code>STATIC_URL</code> is probably configured to <code>/static/</code>.
+Add another line to set the location on the server of the actual static directory:</p>
+
+<pre><code>STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), '/public/static/')
+</code></pre>
+
+<p>This will be the location where Django will put all of your static files &ndash; you shouldn&rsquo;t put stuff here manually as it gets overwritten. Run the collectstatic command now to set up the static items for the admin interface:</p>
+
+<pre><code>cd $HOME/&lt;domain&gt;/
+&lt;projectname&gt;/manage.py collectstatic
+</code></pre>
+
+<p>Finally you should set up your database as required within the settings.py file &ndash; the default is to use sqlite3, which may be suitable for the smallest of sites, but it&rsquo;s likely you&rsquo;ll want to set up a mysql database.
+Once configured, run a syncdb:</p>
+
+<pre><code>&lt;projectname&gt;/manage.py syncdb
+</code></pre>
+
+<p>Set up a superuser as and if required.</p>
+
+<p>Et voila! You should now see the standard Django holding page at your domain and be able to access the admin console at <code>http://domain.name/admin/</code>.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Jonathan Batchelor</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-21T15:37:51+01:00" pubdate data-updated="true">Jul 21<sup>st</sup>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/django/'>django</a>, <a class='category' href='/blog/categories/dreamhost/'>dreamhost</a>, <a class='category' href='/blog/categories/python/'>python</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/" data-via="" data-counturl="http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/">Django on Dreamhost With Up-to-date Python</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Jonathan Batchelor -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
