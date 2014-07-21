@@ -3,22 +3,22 @@
   
   
   <url>
-    <loc>http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/</loc>
+    <loc>http://blog.thebatchelors.net/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/</loc>
     <lastmod>2014-07-21T15:37:51+01:00</lastmod>
     <priority>0.8</priority>
   </url>
   
   
   <url>
-    <loc>http://jmb.github.io/blog/archives/</loc>
-    <lastmod>2014-07-21T16:04:38+01:00</lastmod>
+    <loc>http://blog.thebatchelors.net/blog/archives/</loc>
+    <lastmod>2014-07-21T17:44:04+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>http://jmb.github.io/</loc>
-    <lastmod>2014-07-21T16:04:38+01:00</lastmod>
+    <loc>http://blog.thebatchelors.net/</loc>
+    <lastmod>2014-07-21T17:44:04+01:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>

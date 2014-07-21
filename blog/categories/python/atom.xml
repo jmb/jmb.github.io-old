@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Python | Jonathan's Notes]]></title>
-  <link href="http://jmb.github.io/blog/categories/python/atom.xml" rel="self"/>
-  <link href="http://jmb.github.io/"/>
-  <updated>2014-07-21T16:04:38+01:00</updated>
-  <id>http://jmb.github.io/</id>
+  <link href="http://blog.thebatchelors.net/blog/categories/python/atom.xml" rel="self"/>
+  <link href="http://blog.thebatchelors.net/"/>
+  <updated>2014-07-21T17:44:04+01:00</updated>
+  <id>http://blog.thebatchelors.net/</id>
   <author>
     <name><![CDATA[Jonathan Batchelor]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Django on Dreamhost With Up-to-date Python]]></title>
-    <link href="http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/"/>
+    <link href="http://blog.thebatchelors.net/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python/"/>
     <updated>2014-07-21T15:37:51+01:00</updated>
-    <id>http://jmb.github.io/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python</id>
+    <id>http://blog.thebatchelors.net/blog/2014/07/21/django-on-dreamhost-with-up-to-date-python</id>
     <content type="html"><![CDATA[<p>I recently went through the process of installing my own python (2.7.7) and Django (1.6.5) versions on my Dreamhost account in order to be on the same versions as I&rsquo;m running in development.</p>
 
 <p>I used <a href="http://stackoverflow.com/questions/10953695/update-new-django-and-python-2-7-with-virtualenv-on-dreamhost-with-passenger">this guide from stackexchange</a> as a basis, with a few tweaks.</p>
